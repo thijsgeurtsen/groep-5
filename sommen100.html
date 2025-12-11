@@ -26,6 +26,7 @@
     .back a { color: #4f46e5; text-decoration: none; }
     h1 { margin: 0 0 .3rem; font-size: 1.8rem; }
     .subtitle { color: #555; margin: 0 0 1.5rem; font-size: .95rem; }
+
     .stats {
       display: flex;
       justify-content: space-between;
@@ -97,122 +98,119 @@
     <div id="result" class="result"></div>
   </div>
 
-<script>
-  const timeEl = document.getElementById("time");
-  const scoreEl = document.getElementById("score");
-  const attemptsEl = document.getElementById("attempts");
-  const questionEl = document.getElementById("question");
-  const answerInput = document.getElementById("answer");
-  const feedbackEl = document.getElementById("feedback");
-  const startBtn = document.getElementById("startBtn");
-  const resultEl = document.getElementById("result");
+  <script>
+    const timeEl = document.getElementById("time");
+    const scoreEl = document.getElementById("score");
+    const attemptsEl = document.getElementById("attempts");
+    const questionEl = document.getElementById("question");
+    const answerInput = document.getElementById("answer");
+    const feedbackEl = document.getElementById("feedback");
+    const startBtn = document.getElementById("startBtn");
+    const resultEl = document.getElementById("result");
 
-  let timeLeft = 120;
-  let timerId = null;
-  let score = 0;
-  let attempts = 0;
-  let currentA = null;
-  let currentB = null;
-  let currentOp = "+";
-  let correctAnswer = null;
-  let gameActive = false;
+    let timeLeft = 120;
+    let timerId = null;
+    let score = 0;
+    let attempts = 0;
+    let currentA = null;
+    let currentB = null;
+    let currentOp = "+";
+    let correctAnswer = null;
+    let gameActive = false;
 
-  function formatTime(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return m + ":" + (s < 10 ? "0" + s : s);
-  }
-
-  function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function newQuestion() {
-    const isPlus = Math.random() < 0.5;
-
-    if (isPlus) {
-      currentA = randomInt(0, 100);
-      const maxB = 100 - currentA;
-      currentB = randomInt(0, maxB);
-      currentOp = "+";
-      correctAnswer = currentA + currentB;
-    } else {
-      currentA = randomInt(0, 100);
-      currentB = randomInt(0, currentA);
-      currentOp = "−";
-      correctAnswer = currentA - currentB;
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return m + ":" + (s < 10 ? "0" + s : s);
     }
 
-    questionEl.textContent = `${currentA} ${currentOp} ${currentB} = ?`;
-    answerInput.value = "";
-    answerInput.focus();
-  }
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
-  function startTimer() {
-    timeLeft = 120;
-    timeEl.textContent = formatTime(timeLeft);
-    timerId = setInterval(() => {
-      timeLeft--;
+    function newQuestion() {
+      const isPlus = Math.random() < 0.5;
+
+      if (isPlus) {
+        currentA = randomInt(0, 100);
+        const maxB = 100 - currentA;
+        currentB = randomInt(0, maxB);
+        currentOp = "+";
+        correctAnswer = currentA + currentB;
+      } else {
+        currentA = randomInt(0, 100);
+        currentB = randomInt(0, currentA);
+        currentOp = "-";
+        correctAnswer = currentA - currentB;
+      }
+
+      questionEl.textContent = `${currentA} ${currentOp} ${currentB} = ?`;
+      answerInput.value = "";
+      answerInput.focus();
+    }
+
+    function startTimer() {
+      timeLeft = 120;
       timeEl.textContent = formatTime(timeLeft);
-      if (timeLeft <= 0) endGame();
-    }, 1000);
-  }
-
-  function startGame() {
-    if (gameActive) return;
-
-    gameActive = true;
-    score = 0;
-    attempts = 0;
-    scoreEl.textContent = score;
-    attemptsEl.textContent = attempts;
-    feedbackEl.textContent = "";
-    resultEl.textContent = "";
-    answerInput.disabled = false;
-    startBtn.disabled = true;
-
-    newQuestion();
-    startTimer();
-  }
-
-  function endGame() {
-    if (!gameActive) return;
-
-    gameActive = false;
-    clearInterval(timerId);
-    answerInput.disabled = true;
-    startBtn.disabled = false;
-
-    const percentage = Math.round((score / attempts) * 100) || 0;
-    resultEl.textContent =
-      `Je had ${score} goed van ${attempts} pogingen. (${percentage}%)`;
-  }
-
-  function checkAnswer(e) {
-    if (e.key !== "Enter" || !gameActive) return;
-
-    const value = parseInt(answerInput.value, 10);
-    if (isNaN(value)) return;
-
-    attempts++;
-    attemptsEl.textContent = attempts;
-
-    if (value === correctAnswer) {
-      score++;
-      scoreEl.textContent = score;
-      feedbackEl.textContent = "Goed zo!";
-      feedbackEl.className = "feedback correct";
-    } else {
-      feedbackEl.textContent = `Helaas, het was ${correctAnswer}.`;
-      feedbackEl.className = "feedback wrong";
+      timerId = setInterval(() => {
+        timeLeft--;
+        timeEl.textContent = formatTime(timeLeft);
+        if (timeLeft <= 0) endGame();
+      }, 1000);
     }
 
-    newQuestion();
-  }
+    function startGame() {
+      if (gameActive) return;
+      gameActive = true;
+      score = 0;
+      attempts = 0;
+      scoreEl.textContent = score;
+      attemptsEl.textContent = attempts;
+      feedbackEl.textContent = "";
+      resultEl.textContent = "";
+      answerInput.disabled = false;
+      startBtn.disabled = true;
 
-  startBtn.addEventListener("click", startGame);
-  answerInput.addEventListener("keydown", checkAnswer);
-</script>
+      newQuestion();
+      startTimer();
+    }
 
+    function endGame() {
+      if (!gameActive) return;
+      gameActive = false;
+      clearInterval(timerId);
+      answerInput.disabled = true;
+      startBtn.disabled = false;
+
+      const percentage = Math.round((score / attempts) * 100) || 0;
+      resultEl.textContent =
+        `Je had ${score} goed van ${attempts} pogingen. (${percentage}%)`;
+    }
+
+    function checkAnswer(e) {
+      if (e.key !== "Enter" || !gameActive) return;
+
+      const value = parseInt(answerInput.value, 10);
+      if (isNaN(value)) return;
+
+      attempts++;
+      attemptsEl.textContent = attempts;
+
+      if (value === correctAnswer) {
+        score++;
+        scoreEl.textContent = score;
+        feedbackEl.textContent = "Goed zo!";
+        feedbackEl.className = "feedback correct";
+      } else {
+        feedbackEl.textContent = `Helaas, het was ${correctAnswer}.`;
+        feedbackEl.className = "feedback wrong";
+      }
+
+      newQuestion();
+    }
+
+    startBtn.addEventListener("click", startGame);
+    answerInput.addEventListener("keydown", checkAnswer);
+  </script>
 </body>
 </html>
